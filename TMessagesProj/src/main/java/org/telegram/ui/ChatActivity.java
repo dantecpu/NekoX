@@ -191,6 +191,7 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.EditTextCaption;
 import org.telegram.ui.Components.EmbedBottomSheet;
+import org.telegram.ui.Components.EmojiTextView;
 import org.telegram.ui.Components.EmojiView;
 import org.telegram.ui.Components.ExtendedGridLayoutManager;
 import org.telegram.ui.Components.FireworksOverlay;
@@ -1920,6 +1921,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     Integer end = ids.get(ids.size() - 1);
                     for (int i = 0; i < messages.size(); i++) {
                         int msgId = messages.get(i).getId();
+                        if (NekoConfig.ignoreBlocked && getMessagesController().blockePeers.indexOfKey(messages.get(i).getSenderId()) >= 0)
+                            continue;
                         if (msgId > begin && msgId < end && selectedMessagesIds[0].indexOfKey(msgId) < 0) {
                             MessageObject message = messages.get(i);
                             int type = getMessageType(message);
@@ -5414,7 +5417,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         alertNameTextView.setMaxLines(1);
         alertView.addView(alertNameTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT, 8, 5, 8, 0));
 
-        alertTextView = new TextView(context);
+        alertTextView = new EmojiTextView(context);
         alertTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         alertTextView.setTextColor(Theme.getColor(Theme.key_chat_topPanelMessage));
         alertTextView.setSingleLine(true);
@@ -9985,7 +9988,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             mess = mess.substring(0, 150);
                         }
                         mess = mess.replace('\n', ' ');
-                        replyObjectTextView.setText(Emoji.replaceEmoji(mess, replyObjectTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+                        replyObjectTextView.setText(mess);
                     }
                 }
             } else if (messageObjectToReply != null) {
@@ -10034,14 +10037,14 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (!TextUtils.isEmpty(restrictionReason)) {
                     replyObjectTextView.setText(restrictionReason);
                 } else if (messageObjectToReply.messageOwner.media instanceof TLRPC.TL_messageMediaGame) {
-                    replyObjectTextView.setText(Emoji.replaceEmoji(messageObjectToReply.messageOwner.media.game.title, replyObjectTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+                    replyObjectTextView.setText(messageObjectToReply.messageOwner.media.game.title);
                 } else if (messageObjectToReply.messageText != null || messageObjectToReply.caption != null) {
                     String mess = messageObjectToReply.caption != null ? messageObjectToReply.caption.toString() : messageObjectToReply.messageText.toString();
                     if (mess.length() > 150) {
                         mess = mess.substring(0, 150);
                     }
                     mess = mess.replace('\n', ' ');
-                    replyObjectTextView.setText(Emoji.replaceEmoji(mess, replyObjectTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+                    replyObjectTextView.setText(mess);
                 }
             } else if (messageObjectsToForward != null) {
                 if (messageObjectsToForward.isEmpty()) {
@@ -10140,14 +10143,14 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (messageObjectsToForward.size() == 1 && messageObjectsToForward.get(0).messageText != null) {
                         MessageObject messageObject = messageObjectsToForward.get(0);
                         if (messageObject.messageOwner.media instanceof TLRPC.TL_messageMediaGame) {
-                            replyObjectTextView.setText(Emoji.replaceEmoji(messageObject.messageOwner.media.game.title, replyObjectTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+                            replyObjectTextView.setText(messageObject.messageOwner.media.game.title);
                         } else {
                             String mess = messageObject.messageText.toString();
                             if (mess.length() > 150) {
                                 mess = mess.substring(0, 150);
                             }
                             mess = mess.replace('\n', ' ');
-                            replyObjectTextView.setText(Emoji.replaceEmoji(mess, replyObjectTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+                            replyObjectTextView.setText(mess);
                         }
                     } else {
                         replyObjectTextView.setText(LocaleController.formatPluralString("ForwardedMessageCount", messageObjectsToForward.size()));
@@ -16987,7 +16990,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             alertViewAnimator.start();
         }
         alertNameTextView.setText(name);
-        alertTextView.setText(Emoji.replaceEmoji(message.replace('\n', ' '), alertTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+        alertTextView.setText(message.replace('\n', ' '));
         if (hideAlertViewRunnable != null) {
             AndroidUtilities.cancelRunOnUIThread(hideAlertViewRunnable);
         }
@@ -17390,21 +17393,21 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     mess = mess.replace('\n', ' ');
                     messageTextView.setText(mess);
                 } else if (pinnedMessageObject.messageOwner.media instanceof TLRPC.TL_messageMediaGame) {
-                    messageTextView.setText(Emoji.replaceEmoji(pinnedMessageObject.messageOwner.media.game.title, messageTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+                    messageTextView.setText(pinnedMessageObject.messageOwner.media.game.title);
                 } else if (!TextUtils.isEmpty(pinnedMessageObject.caption)) {
                     String mess = pinnedMessageObject.caption.toString();
                     if (mess.length() > 150) {
                         mess = mess.substring(0, 150);
                     }
                     mess = mess.replace('\n', ' ');
-                    messageTextView.setText(Emoji.replaceEmoji(mess, messageTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+                    messageTextView.setText(mess);
                 } else if (pinnedMessageObject.messageText != null) {
                     String mess = pinnedMessageObject.messageText.toString();
                     if (mess.length() > 150) {
                         mess = mess.substring(0, 150);
                     }
                     mess = mess.replace('\n', ' ');
-                    messageTextView.setText(Emoji.replaceEmoji(mess, messageTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+                    messageTextView.setText(mess);
                 }
                 if (animateToNext != 0) {
                     pinnedNextAnimation[0] = new AnimatorSet();
@@ -21755,7 +21758,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             } else if (type == 1) {
                 Browser.openUrl(getParentActivity(), url, inlineReturn == 0, false);
             } else if (type == 2) {
-                Browser.openUrl(getParentActivity(), url, inlineReturn == 0);
+                // NekoX: Fix skipOpenLinkConfirm broken in 7.6.0, since processExternalUrl is imported in 7.6.0
+                if (NekoConfig.skipOpenLinkConfirm)
+                    Browser.openUrl(getParentActivity(), url, inlineReturn == 0);
+                else
+                    AlertsCreator.showOpenUrlAlert(ChatActivity.this, url, true, true, true);
             }
         }
     }

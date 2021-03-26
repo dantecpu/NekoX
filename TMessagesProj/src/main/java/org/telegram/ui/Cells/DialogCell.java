@@ -71,6 +71,7 @@ import org.telegram.ui.SwipeGestureSettingsView;
 
 import java.util.ArrayList;
 
+import tw.nekomimi.nekogram.MessageHelper;
 import tw.nekomimi.nekogram.NekoConfig;
 
 public class DialogCell extends BaseCell {
@@ -778,7 +779,7 @@ public class DialogCell extends BaseCell {
                             drawScam = 2;
                             Theme.dialogs_fakeDrawable.checkText();
                         } else {
-                            drawVerified = chat.verified;
+                            drawVerified = chat.verifiedExtended();
                         }
                         if (SharedConfig.drawDialogIcons) {
                             if (useForceThreeLines || SharedConfig.useThreeLinesLayout) {
@@ -823,7 +824,7 @@ public class DialogCell extends BaseCell {
                             drawScam = 2;
                             Theme.dialogs_fakeDrawable.checkText();
                         } else {
-                            drawVerified = user.verified;
+                            drawVerified = user.verifiedExtended();
                         }
                         if (SharedConfig.drawDialogIcons && user.bot) {
                             drawNameBot = true;
@@ -1942,7 +1943,13 @@ public class DialogCell extends BaseCell {
                         clearingDialog = MessagesController.getInstance(currentAccount).isClearingDialog(dialog.id);
                         message = MessagesController.getInstance(currentAccount).dialogMessage.get(dialog.id);
                         if (message != null && NekoConfig.ignoreBlocked && MessagesController.getInstance(currentAccount).blockePeers.indexOfKey(message.getSenderId()) >= 0) {
-                            message = null;
+                            if (MessagesController.getInstance(currentAccount).dialogMessageFromUnblocked.get(dialog.id) != null)
+                                message = MessagesController.getInstance(currentAccount).dialogMessageFromUnblocked.get(dialog.id);
+                            else {
+                                message = MessageHelper.getInstance(currentAccount).getLastMessageFromUnblock(dialog.id);
+                                MessagesController.getInstance(currentAccount).dialogMessageFromUnblocked.put(dialog.id, message);
+                            }
+                            // Username show may be abnormal if User who send `message` is not loaded in (never enter chat since boot, esp after cold starting)
                         }
                         lastUnreadState = message != null && message.isUnread();
                         if (dialog instanceof TLRPC.TL_dialogFolder) {
@@ -2420,7 +2427,7 @@ public class DialogCell extends BaseCell {
             }
 
 //            if (width / 2 < AndroidUtilities.dp(40)) {
-         //       canvas.drawText(swipeMessage, getMeasuredWidth() - AndroidUtilities.dp(43) - width / 2, AndroidUtilities.dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 62 : 59), Theme.dialogs_archiveTextPaint);
+            //       canvas.drawText(swipeMessage, getMeasuredWidth() - AndroidUtilities.dp(43) - width / 2, AndroidUtilities.dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 62 : 59), Theme.dialogs_archiveTextPaint);
 //            }
 
             canvas.restore();

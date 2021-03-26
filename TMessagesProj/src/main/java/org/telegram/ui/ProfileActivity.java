@@ -92,7 +92,6 @@ import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
-import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
@@ -169,8 +168,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Random;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -5782,7 +5779,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     String phoneString = PhoneFormat.getInstance().format("+" + user.phone);
                     nameTextView[a].setText(phoneString);
                 } else {
-                    nameTextView[a].setText(Emoji.replaceEmoji(newString, nameTextView[a].getPaint().getFontMetricsInt(), AndroidUtilities.dp(18), false));
+                    nameTextView[a].setText(newString);
                 }
                 if (a == 0 && onlineTextOverride != null) {
                     onlineTextView[a].setText(onlineTextOverride);
@@ -5799,7 +5796,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     }
                 } else if (user.scam || user.fake) {
                     rightIcon = getScamDrawable(user.scam ? 0 : 1);
-                } else if (user.verified) {
+                } else if (user.verifiedExtended()) {
                     rightIcon = getVerifiedCrossfadeDrawable();
                 }
                 nameTextView[a].setLeftDrawable(leftIcon);
@@ -5899,7 +5896,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (a != 0) {
                     if (chat.scam || chat.fake) {
                         nameTextView[a].setRightDrawable(getScamDrawable(chat.scam ? 0 : 1));
-                    } else if (chat.verified) {
+                    } else if (chat.verifiedExtended()) {
                         nameTextView[a].setRightDrawable(getVerifiedCrossfadeDrawable());
                     } else {
                         nameTextView[a].setRightDrawable(null);
@@ -6148,7 +6145,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         // NekoX-TODO: Check Chnage
 
         if (imageUpdater != null) {
-            otherItem.addSubItem(add_photo, R.drawable.msg_addphoto, LocaleController.getString("AddPhoto", R.string.AddPhoto));
             otherItem.addSubItem(set_as_main, R.drawable.menu_private, LocaleController.getString("SetAsMain", R.string.SetAsMain));
             otherItem.addSubItem(gallery_menu_save, R.drawable.baseline_image_24, LocaleController.getString("SaveToGallery", R.string.SaveToGallery));
             //otherItem.addSubItem(edit_avatar, R.drawable.photo_paint, LocaleController.getString("EditPhoto", R.string.EditPhoto));
@@ -6779,7 +6775,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     cell.getTextView().setMovementMethod(null);
                     cell.setBackgroundDrawable(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
 
-                    cell.setText("Nekogram X v" + BuildConfig.VERSION_NAME + " " + FileUtil.getAbi() + " " + BuildConfig.BUILD_TYPE);
+                    cell.setText("Nekogram X v" + BuildConfig.VERSION_NAME + " " + FileUtil.getAbi() + " " + BuildConfig.FLAVOR + " " + BuildConfig.BUILD_TYPE);
 
                     cell.getTextView().setPadding(0, AndroidUtilities.dp(14), 0, AndroidUtilities.dp(14));
                     view = cell;
